@@ -1,13 +1,10 @@
-const path = require('path');
-const { format } = require('url');
-const { rpc, u } = require('@cityofzion/neon-js');
+import electron from 'electron';
+import path from 'path';
+import { rpc, u } from '@cityofzion/neon-js';
 
 // TODO: Configurable network settings and script hash
 const NS_SCRIPT_HASH = '0xe60a3fa8149a853eb4dff4f6ed93c931646a9e22';
 const RPC_URL = 'http://localhost:30333';
-
-// https://cs.chromium.org/chromium/src/net/base/net_error_list.h
-// const FILE_NOT_FOUND = -6;
 
 function isNOS(host) {
   return host === 'nos.neo';
@@ -17,7 +14,7 @@ function isLocal(host) {
   return /^(localhost|127.0.0.1|0.0.0.0|::1)/.test(host);
 }
 
-async function resolve(url) {
+export default async function resolve(url) {
   const { host, pathname } = url;
 
   if (isNOS(host)) {
@@ -26,11 +23,7 @@ async function resolve(url) {
     if (process.env.ELECTRON_START_URL) {
       return path.join(process.env.ELECTRON_START_URL, filename);
     } else {
-      return format({
-        pathname: path.join(__dirname, filename),
-        protocol: 'file:',
-        slashes: true
-      });
+      return `${electron.getAppPath()}${pathname === '/' ? '/welcome.html' : pathname}`;
     }
   }
 
@@ -50,5 +43,3 @@ async function resolve(url) {
 
   return `${target}${pathname}`;
 }
-
-module.exports = resolve;
